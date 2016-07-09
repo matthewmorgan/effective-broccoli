@@ -1,0 +1,141 @@
+$jstor-standard-border-color: #eaeaea;
+$jstor-standard-light-blue: #ADD8E6;
+$jstor-standard-dark-blue: #0000A0;
+
+$combo-input-height: 38px;
+$combo-wrapper-height: 40px;
+$combo-caret-button-width: 27px;
+$form-spacing: rem-calc(16);
+
+[hidden] { display: none; }
+
+.combo-wrapper {
+    height: $combo-wrapper-height;
+    width: 100%;
+    border: 1px solid $jstor-standard-border-color;
+    margin-bottom: 10px;
+}
+
+.combo-input {
+    height: $combo-input-height;
+    width: 93%;
+    overflow: hidden;
+    border: none;
+    box-shadow: none;
+    margin-bottom: 0;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    padding: $form-spacing/2 $form-spacing/2 0 $form-spacing/2;
+}
+
+.combo-caret-button {
+    background: url('../../shared/images/dropdown.png') no-repeat scroll right center #FFFFFF;
+    overflow: hidden;
+    display: inline-block;
+    padding: 4px 6px;
+    vertical-align: top;
+    width: 7%;
+    float: right;
+    height: $combo-input-height;
+    border: none;
+    border-left: 1px solid $jstor-standard-border-color;
+    margin-bottom: 0;
+    position: relative;
+}
+
+.visually-hidden {
+    position: absolute;
+    clip: rect(0, 0, 0, 0);
+}
+
+div.combo-wrapper {
+    display: inline-block;
+    position: relative;
+}
+
+div.combo-wrapper > input {
+    display: block;
+}
+
+div.combo-wrapper > ul {
+    position: absolute;
+    left: 0;
+    top: $combo-input-height;
+    z-index: 1;
+    min-width: 100%;
+    box-sizing: border-box;
+    list-style: none;
+    padding: 0;
+    border-radius: .3em;
+    margin: .2em 0 0;
+    background: hsla(0,0%,100%,.9);
+    background: linear-gradient(to bottom right, white, hsla(0,0%,100%,.8));
+    border: 1px solid rgba(0,0,0,.3);
+    box-shadow: .05em .2em .6em rgba(0,0,0,.2);
+    text-shadow: none;
+}
+
+div.combo-wrapper > ul[hidden],
+div.combo-wrapper > ul:empty {
+    display: none;
+}
+
+@supports (transform: scale(0)) {
+    div.combo-wrapper > ul {
+        transition: .3s cubic-bezier(.4,.2,.5,1.4);
+        transform-origin: 1.43em -.43em;
+    }
+
+    div.combo-wrapper > ul[hidden],
+    div.combo-wrapper > ul:empty {
+        opacity: 0;
+        transform: scale(0);
+        display: block;
+        transition-timing-function: ease;
+    }
+}
+
+/* Pointer */
+div.combo-wrapper > ul:before {
+    content: "";
+    position: absolute;
+    top: -.43em;
+    left: 1em;
+    width: 0; height: 0;
+    padding: .4em;
+    background: white;
+    border: inherit;
+    border-right: 0;
+    border-bottom: 0;
+    -webkit-transform: rotate(45deg);
+    transform: rotate(45deg);
+}
+
+div.combo-wrapper > ul > li {
+    position: relative;
+    padding: .2em .5em;
+    cursor: pointer;
+}
+
+div.combo-wrapper > ul > li:hover {
+    background: $jstor-standard-light-blue;
+    color: black;
+}
+
+div.combo-wrapper > ul > li[aria-selected="true"] {
+    background: $jstor-standard-dark-blue;
+    color: white;
+}
+
+div.combo-wrapper mark {
+    background: $jstor-standard-light-blue;
+}
+
+div.combo-wrapper li:hover mark {
+    background: #ffffff;
+}
+
+div.combo-wrapper li[aria-selected="true"] mark {
+    background: $jstor-standard-dark-blue;
+    color: inherit;
+}
