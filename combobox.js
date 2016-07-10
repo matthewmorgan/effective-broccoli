@@ -12,6 +12,7 @@
 
 jQuery.noConflict();
 
+//ITHAKA html for our replacement combobox
 var html = "";
 html += "<div class=\"small-12 medium-6 columns\">";
 html += "    <label for=\"combobox_id\">combobox_label<\/label>";
@@ -28,8 +29,8 @@ function getTemplate() {
 
 function buildComboBoxHtml(config, template) {
   var rendered = template.replace(/combobox_id/g, config.id);
-  rendered = rendered.replace('combobox_name', config.name);
-  rendered = rendered.replace('combobox_label', config.name);
+  rendered = rendered.replace(/combobox_name/g, config.name);
+  rendered = rendered.replace(/combobox_label/g, config.name);
   return rendered;
 }
 
@@ -490,7 +491,7 @@ function locateAllSelectorsWithClass(className) {
             var comboplete = new _(
                   $(selectorId),
                   {
-                    minChars:  1,
+                    minChars:  0,
                     list:      selectorConfig.dataList,
                     autoFirst: false
                   }

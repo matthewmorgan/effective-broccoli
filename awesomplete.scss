@@ -2,10 +2,10 @@ $jstor-standard-border-color: #eaeaea;
 $jstor-standard-light-blue: #ADD8E6;
 $jstor-standard-dark-blue: #0000A0;
 
-$combo-input-height: 38px;
+$combo-input-height: 40px;
 $combo-wrapper-height: 40px;
 $combo-caret-button-width: 27px;
-$form-spacing: rem-calc(16);
+$form-spacing: 4px;
 
 [hidden] { display: none; }
 
@@ -34,7 +34,7 @@ $form-spacing: rem-calc(16);
     display: inline-block;
     padding: 4px 6px;
     vertical-align: top;
-    width: 7%;
+    width: 20px;
     float: right;
     height: $combo-input-height;
     border: none;
