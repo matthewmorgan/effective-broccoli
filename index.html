@@ -1,15 +1,32 @@
 <html>
-<head>
-    <link href="./awesomplete.css" rel="stylesheet"/>
-</head>
-<body>
-<select id="id_something" class="combobox">
-    <option value="au">Australia</option>
-    <option value="gb">Great Britain</option>
-    <option value="us">United States</option>
-</select>
-</body>
+    <head>
+        <link href="./awesomplete.css" rel="stylesheet"/>
+    </head>
+    <body>
+        <div>
+            <label for="id_country">Pick a Country</label>
+            <select id="id_country" class="combobox">
+                <option value="au">Australia</option>
+                <option value="gb">Great Britain</option>
+                <option value="us">United States</option>
+            </select>
+        </div>
+        <br/>
+        <br/>
+        <br/>
+        <br/>
+        <br/>
+        <br/>
+        <div>
+            <label for="id_planet">Pick a Planet</label>
+            <select id="id_planet" class="combobox">
+                <option value="au">Earth</option>
+                <option value="gb">Mars</option>
+                <option value="us">Saturn</option>
+            </select>
+        </div>
+    </body>
 <script src="https://code.jquery.com/jquery-3.1.0.min.js"
-        integrity="sha256-cCueBR6CsyA4/9szpPfrX3s49M9vUU5BgtiJj06wt/s=" crossorigin="anonymous"></script>
+        integrity="sha256-cCueBR6CsyA4/9szpPfrX3s49M9vUU5BgtiJj06wt/s=" crossorigin="anonymous">jQuery.noConflict();</script>
 <script src='./combobox.js'></script>
 </html>

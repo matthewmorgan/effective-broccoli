@@ -8,47 +8,68 @@
  * Modifications noted with //ITHAKA comments
  *
  */
-/**
- * var input = document.getElementById("myinput");
- // Show label but insert value into the input:
- new Awesomplete(input, {
-        list: [
-            { label: "Belarus", value: "BY" },
-            { label: "China", value: "CN" },
-            { label: "United States", value: "US" }
-        ]
-    });
- *
- */
 
-var html="";
+
+jQuery.noConflict();
+
+var html = "";
 html += "<div class=\"small-12 medium-6 columns\">";
 html += "    <label for=\"combobox_id\">combobox_label<\/label>";
 html += "    <div class=\"combo-wrapper\">";
 html += "        <button class=\"combo-caret-button\" type=\"button\"><\/button>";
-html += "        <input id=\"combobox_id\" name=\"combobox_name\" data-list=\"combobox_datalist\" class=\"combo-input\"\/>";
+html += "        <input id=\"combobox_id\" name=\"combobox_name\" data-list=\"\" class=\"combo-input\"\/>";
 html += "    <\/div>";
 html += "<\/div>";
 
+function getTemplate() {
+  return '' + html;
+}
 
-function buildComboBoxHtml(attributes, template){
-  var rendered = template.replace('combobox_id', attributes.combobox_id);
-  rendered = rendered.replace('combobox_name', attributes.combobox_id);
-  rendered = rendered.replace('combobox_datalist', attributes.combobox_id);
+
+function buildComboBoxHtml(config, template) {
+  var rendered = template.replace(/combobox_id/g, config.id);
+  rendered = rendered.replace('combobox_name', config.name);
+  rendered = rendered.replace('combobox_label', config.name);
   return rendered;
 }
 
-function parseDataList(selectorId){
-  var options = document.getElementById(selectorId).options;
-  return Object.keys(options)
-      .reduce(function(list, key){
-        var option = options[key];
-        list.push({
-          label: option.text,
-          value: option.value
-        });
-        return list;
-      }, []);
+function parseDataList(selectorId) {
+  return Array.prototype.reduce
+      .call(
+          document.getElementById(selectorId).options,
+          appendListElement,
+          []
+      );
+}
+
+function appendListElement(list, option) {
+  list.push(
+      //{
+      //  label: option.text,
+      //  value: option.value
+      //}
+      option.text
+  );
+  return list;
+}
+
+function parseSelectors(selectors) {
+  var selectorConfigMap = [];
+  selectors.each(function (idx, selector) {
+    var dataList = parseDataList(selector.id);
+    selectorConfigMap.push(
+        {
+          id:       selector.id,
+          dataList: dataList,
+          name:     jQuery('label[for="' + selector.id + '"]').text()
+        }
+    );
+  });
+  return selectorConfigMap;
+}
+
+function locateAllSelectorsWithClass(className) {
+  return jQuery('select.' + className);
 }
 
 (function () {
@@ -65,14 +86,14 @@ function parseDataList(selectorId){
     o = o || {};
 
     configure(this, {
-      minChars: 2,
-      maxItems: 10,
+      minChars:  2,
+      maxItems:  10,
       autoFirst: false,
-      data: _.DATA,
-      filter: _.FILTER_CONTAINS,
-      sort: _.SORT_BYLENGTH,
-      item: _.ITEM,
-      replace: _.REPLACE
+      data:      _.DATA,
+      filter:    _.FILTER_CONTAINS,
+      sort:      _.SORT_BYLENGTH,
+      item:      _.ITEM,
+      replace:   _.REPLACE
     }, o);
 
     this.index = -1;
@@ -80,7 +101,7 @@ function parseDataList(selectorId){
     // Create necessary elements
 
     //ITHAKA expect existing wrapper instead of creating a new one
-    this.container = $("div.combo-wrapper");
+    this.container = $(input).parentElement;
 
     this.ul = $.create("ul", {
       hidden: "hidden",
@@ -88,18 +109,18 @@ function parseDataList(selectorId){
     });
 
     this.status = $.create("span", {
-      className: "visually-hidden",
-      role: "status",
-      "aria-live": "assertive",
+      className:       "visually-hidden",
+      role:            "status",
+      "aria-live":     "assertive",
       "aria-relevant": "additions",
-      inside: this.container
+      inside:          this.container
     });
 
     // Bind events
 
     $.bind(this.input, {
-      "input": this.evaluate.bind(this),
-      "blur": this.close.bind(this, {reason: "blur"}),
+      "input":   this.evaluate.bind(this),
+      "blur":    this.close.bind(this, {reason: "blur"}),
       "keydown": function (evt) {
         var c = evt.keyCode;
 
@@ -256,7 +277,7 @@ function parseDataList(selectorId){
         var suggestion = this.suggestions[this.index];
 
         var allowed = $.fire(this.input, "awesomplete-select", {
-          text: suggestion,
+          text:   suggestion,
           origin: origin || selected
         });
 
@@ -328,7 +349,7 @@ function parseDataList(selectorId){
   _.ITEM = function (text, input) {
     var html = input === '' ? text : text.replace(RegExp($.regExpEscape(input.trim()), "gi"), "<mark>$&</mark>");
     return $.create("li", {
-      innerHTML: html,
+      innerHTML:       html,
       "aria-selected": "false"
     });
   };
@@ -460,27 +481,43 @@ function parseDataList(selectorId){
 
   function init() {
     //ITHAKA
-    $$("input.combo-input").forEach(function (input) {
-      // new _(input);
-      var comboplete = new _(
-          'input.combo-input',
-          { minChars: 0 }
-      );
-      _.$('.combo-caret-button')
-          .addEventListener("click", (function () {
-                if (comboplete.ul.childNodes.length === 0) {
-                  comboplete.minChars = 0;
-                  comboplete.evaluate();
-                }
-                else if (comboplete.ul.hasAttribute('hidden')) {
-                  comboplete.open();
-                }
-                else {
-                  comboplete.close();
-                }
-              })()
-          );
-    });
+    function buildComboboxes(selectorConfigMap) {
+      selectorConfigMap
+          .forEach(function (selectorConfig) {
+            var newHtml = buildComboBoxHtml(selectorConfig, getTemplate());
+            var selectorId = '#' + selectorConfig.id;
+            jQuery(selectorId).parent().replaceWith(newHtml);
+            var comboplete = new _(
+                  $(selectorId),
+                  {
+                    minChars:  1,
+                    list:      selectorConfig.dataList,
+                    autoFirst: false
+                  }
+              );
+
+            jQuery(selectorId).parent().find('.combo-caret-button')
+                .on("click", function () {
+                  if (comboplete.ul.childNodes.length === 0) {
+                    comboplete.minChars = 0;
+                    comboplete.evaluate();
+                  }
+                  else if (comboplete.ul.hasAttribute('hidden')) {
+                    comboplete.open();
+                  }
+                  else {
+                    comboplete.close();
+                  }
+                });
+          });
+    }
+
+    var allSelectors = locateAllSelectorsWithClass('combobox');
+    console.log(allSelectors);
+    var configMap = parseSelectors(allSelectors);
+    console.log(configMap);
+    buildComboboxes(configMap);
+
   }
 
 // Are we in a browser? Check for Document constructor
@@ -497,7 +534,7 @@ function parseDataList(selectorId){
 
   _.$ = $;
   _.$$ = $$;
-  //ITHAKA expose out init() function
+  //ITHAKA expose our init() function
   _.init = init;
 
 // Make sure to export Awesomplete on self when in a browser
