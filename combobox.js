@@ -18,7 +18,8 @@ html += "<div class=\"small-12 medium-6 columns\">";
 html += "    <label for=\"combobox_id\">combobox_label<\/label>";
 html += "    <div class=\"combo-wrapper\">";
 html += "        <button class=\"combo-caret-button\" type=\"button\"><\/button>";
-html += "        <input id=\"combobox_id\" name=\"combobox_name\" data-list=\"\" class=\"combo-input\"\/>";
+html += "        <input id=\"combobox_id\" name=\"combobox_name\" data-list=\"\" class=\"combo-input\" placeholder=\"Please select an option\"\/>";
+html += "        <span hidden>A valid entry is required</span>";
 html += "    <\/div>";
 html += "<\/div>";
 
@@ -26,12 +27,11 @@ function getTemplate() {
   return '' + html;
 }
 
-
 function buildComboBoxHtml(config, template) {
-  var rendered = template.replace(/combobox_id/g, config.id);
-  rendered = rendered.replace(/combobox_name/g, config.name);
-  rendered = rendered.replace(/combobox_label/g, config.name);
-  return rendered;
+  return template
+      .replace(/combobox_id/g, config.id)
+      .replace(/combobox_name/g, config.name)
+      .replace(/combobox_label/g, config.name);
 }
 
 function parseDataList(selectorId) {
@@ -60,9 +60,10 @@ function parseSelectors(selectors) {
     var dataList = parseDataList(selector.id);
     selectorConfigMap.push(
         {
-          id:       selector.id,
-          dataList: dataList,
-          name:     jQuery('label[for="' + selector.id + '"]').text()
+          id:            selector.id,
+          dataList:      dataList,
+          name:          jQuery('label[for="' + selector.id + '"]').text(),
+          allowFreeText: false
         }
     );
   });
@@ -71,6 +72,61 @@ function parseSelectors(selectors) {
 
 function locateAllSelectorsWithClass(className) {
   return jQuery('select.' + className);
+}
+
+function buildComboboxes(selectorConfigMap, _, $) {
+  selectorConfigMap
+      .forEach(function (selectorConfig) {
+        var newHtml = buildComboBoxHtml(selectorConfig, getTemplate());
+        var selectorId = '#' + selectorConfig.id;
+        jQuery(selectorId).parent().replaceWith(newHtml);
+        var comboplete = new _(
+            $(selectorId),
+            {
+              minChars:  3,
+              list:      selectorConfig.dataList,
+              autoFirst: false
+            }
+        );
+
+        selectorConfig.comboplete = comboplete;
+
+        jQuery(selectorId).parent().find('.combo-caret-button')
+            .on("click", function () {
+              if (comboplete.ul.childNodes.length === 0) {
+                comboplete.minChars = 0;
+                comboplete.evaluate();
+              }
+              else if (comboplete.ul.hasAttribute('hidden')) {
+                comboplete.open();
+              }
+              else {
+                comboplete.close();
+              }
+            });
+        jQuery(selectorId).on('focus', function(){
+          jQuery(selectorId).select();
+        });
+        jQuery(selectorId).on('change', function (evt) {
+          validateContent(evt, selectorConfig);
+        });
+      });
+}
+
+function validateContent(evt, selectorConfig) {
+  //only one rule right now: must match something in the list
+  var selector = jQuery('#' + selectorConfig.id);
+  var userInput = selector.val();
+  var matchFound = selectorConfig.dataList.some(function (entry) {
+    return entry.toLowerCase() === userInput.toLowerCase();
+  });
+  if (!matchFound) {
+    console.log(evt.target);
+    selector.attr('placeholder','A valid entry is required.  Please click the dropdown to select from the list.');
+    selector.val('');
+  } else {
+    selector.parent().find('span').attr('hidden', '');
+  }
 }
 
 (function () {
@@ -276,7 +332,6 @@ function locateAllSelectorsWithClass(className) {
 
       if (selected) {
         var suggestion = this.suggestions[this.index];
-
         var allowed = $.fire(this.input, "awesomplete-select", {
           text:   suggestion,
           origin: origin || selected
@@ -482,43 +537,7 @@ function locateAllSelectorsWithClass(className) {
 
   function init() {
     //ITHAKA
-    function buildComboboxes(selectorConfigMap) {
-      selectorConfigMap
-          .forEach(function (selectorConfig) {
-            var newHtml = buildComboBoxHtml(selectorConfig, getTemplate());
-            var selectorId = '#' + selectorConfig.id;
-            jQuery(selectorId).parent().replaceWith(newHtml);
-            var comboplete = new _(
-                  $(selectorId),
-                  {
-                    minChars:  0,
-                    list:      selectorConfig.dataList,
-                    autoFirst: false
-                  }
-              );
-
-            jQuery(selectorId).parent().find('.combo-caret-button')
-                .on("click", function () {
-                  if (comboplete.ul.childNodes.length === 0) {
-                    comboplete.minChars = 0;
-                    comboplete.evaluate();
-                  }
-                  else if (comboplete.ul.hasAttribute('hidden')) {
-                    comboplete.open();
-                  }
-                  else {
-                    comboplete.close();
-                  }
-                });
-          });
-    }
-
-    var allSelectors = locateAllSelectorsWithClass('combobox');
-    console.log(allSelectors);
-    var configMap = parseSelectors(allSelectors);
-    console.log(configMap);
-    buildComboboxes(configMap);
-
+    buildComboboxes(parseSelectors(locateAllSelectorsWithClass('combobox')), _, $);
   }
 
 // Are we in a browser? Check for Document constructor
