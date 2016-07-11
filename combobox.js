@@ -21,7 +21,7 @@ html += "<div class=\"small-12 medium-6 columns\">";
 html += "    <label for=\"combobox_id\">combobox_label<\/label>";
 html += "    <div class=\"combo-wrapper\">";
 html += "        <button class=\"combo-caret-button\" type=\"button\"><\/button>";
-html += "        <input id=\"combobox_id\" name=\"form_field_name\" data-list=\"\" class=\"combo-input\" placeholder=\""+INITIAL_PLACEHOLDER+"\"\/>";
+html += "        <input id=\"combobox_id\" name=\"form_field_name\" type=\"text\" data-list=\"\" class=\"combo-input\" placeholder=\""+INITIAL_PLACEHOLDER+"\"\/>";
 html += "    <\/div>";
 html += "<\/div>";
 
@@ -47,13 +47,7 @@ function parseDataList(selectorId) {
 }
 
 function appendListElement(list, option) {
-  list.push(
-      //{
-      //  label: option.text,
-      //  value: option.value
-      //}
-      option.text
-  );
+  list.push(option.text);
   return list;
 }
 
@@ -90,8 +84,9 @@ function buildComboboxes(options) {
         var newHtml = buildComboBoxHtml(selectorConfig, getTemplate());
         var selectorId = '#' + selectorConfig.id;
         jQuery(selectorId).parent().replaceWith(newHtml);
+        var jqSelector = jQuery(selectorId);
         if (selectorConfig.errorMessage.length>0){
-          jQuery(selectorId).after(selectorConfig.errorMessage);
+          jqSelector.after(selectorConfig.errorMessage);
         }
         var comboplete = new _(
             $(selectorId),
@@ -104,7 +99,7 @@ function buildComboboxes(options) {
 
         selectorConfig.comboplete = comboplete;
 
-        jQuery(selectorId).parent().find('.combo-caret-button')
+        jqSelector.parent().find('.combo-caret-button')
             .on("click", function () {
               if (comboplete.ul.childNodes.length === 0) {
                 comboplete.minChars = 0;
@@ -117,11 +112,11 @@ function buildComboboxes(options) {
                 comboplete.close();
               }
             });
-        jQuery(selectorId).on('focus', function(){
-          jQuery(selectorId).select();
+        jqSelector.on('focus', function(){
+          jqSelector.select();
         });
         if (!selectorConfig.freeText){
-          jQuery(selectorId).on('change', function (evt) {
+          jqSelector.on('change', function (evt) {
             validateContent(evt, selectorConfig);
           });
         }
