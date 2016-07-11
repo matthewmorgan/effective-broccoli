@@ -13,6 +13,7 @@
 jQuery.noConflict();
 
 //ITHAKA
+var INITIAL_PLACEHOLDER = 'Please select an option.';
 var VALIDATION_PLACEHOLDER = 'A valid entry is required.  Please click the dropdown to select from the list.';
 
 var html = "";
@@ -20,7 +21,7 @@ html += "<div class=\"small-12 medium-6 columns\">";
 html += "    <label for=\"combobox_id\">combobox_label<\/label>";
 html += "    <div class=\"combo-wrapper\">";
 html += "        <button class=\"combo-caret-button\" type=\"button\"><\/button>";
-html += "        <input id=\"combobox_id\" name=\"combobox_name\" data-list=\"\" class=\"combo-input\" placeholder=\"Please select an option\"\/>";
+html += "        <input id=\"combobox_id\" name=\"combobox_name\" data-list=\"\" class=\"combo-input\" placeholder=\""+INITIAL_PLACEHOLDER+"\"\/>";
 html += "        <span hidden>A valid entry is required</span>";
 html += "    <\/div>";
 html += "<\/div>";
@@ -60,12 +61,13 @@ function parseSelectors(selectors) {
   var selectorConfigMap = [];
   selectors.each(function (idx, selector) {
     var dataList = parseDataList(selector.id);
+    console.log((jQuery(selector)));
     selectorConfigMap.push(
         {
           id:            selector.id,
           dataList:      dataList,
           name:          jQuery('label[for="' + selector.id + '"]').text(),
-          allowFreeText: false
+          freeText:      jQuery(selector).hasClass('freetext')
         }
     );
   });
@@ -113,9 +115,11 @@ function buildComboboxes(options) {
         jQuery(selectorId).on('focus', function(){
           jQuery(selectorId).select();
         });
-        jQuery(selectorId).on('change', function (evt) {
-          validateContent(evt, selectorConfig);
-        });
+        if (!selectorConfig.freeText){
+          jQuery(selectorId).on('change', function (evt) {
+            validateContent(evt, selectorConfig);
+          });
+        }
       });
 }
 
