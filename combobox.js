@@ -12,7 +12,9 @@
 
 jQuery.noConflict();
 
-//ITHAKA html for our replacement combobox
+//ITHAKA
+var VALIDATION_PLACEHOLDER = 'A valid entry is required.  Please click the dropdown to select from the list.';
+
 var html = "";
 html += "<div class=\"small-12 medium-6 columns\">";
 html += "    <label for=\"combobox_id\">combobox_label<\/label>";
@@ -74,7 +76,11 @@ function locateAllSelectorsWithClass(className) {
   return jQuery('select.' + className);
 }
 
-function buildComboboxes(selectorConfigMap, _, $) {
+function buildComboboxes(options) {
+  var selectorConfigMap = options.selectorConfigMap;
+  var _ = options._;
+  var $ = options.$;
+
   selectorConfigMap
       .forEach(function (selectorConfig) {
         var newHtml = buildComboBoxHtml(selectorConfig, getTemplate());
@@ -122,7 +128,7 @@ function validateContent(evt, selectorConfig) {
   });
   if (!matchFound) {
     console.log(evt.target);
-    selector.attr('placeholder','A valid entry is required.  Please click the dropdown to select from the list.');
+    selector.attr('placeholder', VALIDATION_PLACEHOLDER);
     selector.val('');
   } else {
     selector.parent().find('span').attr('hidden', '');
@@ -537,7 +543,13 @@ function validateContent(evt, selectorConfig) {
 
   function init() {
     //ITHAKA
-    buildComboboxes(parseSelectors(locateAllSelectorsWithClass('combobox')), _, $);
+    buildComboboxes(
+        {
+          selectorConfigMap: parseSelectors(locateAllSelectorsWithClass('combobox')),
+          _: _,
+          $: $
+        }
+    );
   }
 
 // Are we in a browser? Check for Document constructor
