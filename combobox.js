@@ -22,7 +22,6 @@ html += "    <label for=\"combobox_id\">combobox_label<\/label>";
 html += "    <div class=\"combo-wrapper\">";
 html += "        <button class=\"combo-caret-button\" type=\"button\"><\/button>";
 html += "        <input id=\"combobox_id\" name=\"combobox_name\" data-list=\"\" class=\"combo-input\" placeholder=\""+INITIAL_PLACEHOLDER+"\"\/>";
-html += "        <span hidden>A valid entry is required</span>";
 html += "    <\/div>";
 html += "<\/div>";
 
@@ -67,7 +66,8 @@ function parseSelectors(selectors) {
           id:            selector.id,
           dataList:      dataList,
           name:          jQuery('label[for="' + selector.id + '"]').text(),
-          freeText:      jQuery(selector).hasClass('freetext')
+          freeText:      jQuery(selector).hasClass('freetext'),
+          errorMessage:  jQuery(selector).next('.errorMessage')
         }
     );
   });
@@ -88,6 +88,9 @@ function buildComboboxes(options) {
         var newHtml = buildComboBoxHtml(selectorConfig, getTemplate());
         var selectorId = '#' + selectorConfig.id;
         jQuery(selectorId).parent().replaceWith(newHtml);
+        if (selectorConfig.errorMessage.length>0){
+          jQuery(selectorId).after(selectorConfig.errorMessage);
+        }
         var comboplete = new _(
             $(selectorId),
             {
@@ -131,7 +134,6 @@ function validateContent(evt, selectorConfig) {
     return entry.toLowerCase() === userInput.toLowerCase();
   });
   if (!matchFound) {
-    console.log(evt.target);
     selector.attr('placeholder', VALIDATION_PLACEHOLDER);
     selector.val('');
   } else {
