@@ -21,7 +21,7 @@ html += "<div class=\"small-12 medium-6 columns\">";
 html += "    <label for=\"combobox_id\">combobox_label<\/label>";
 html += "    <div class=\"combo-wrapper\">";
 html += "        <button class=\"combo-caret-button\" type=\"button\"><\/button>";
-html += "        <input id=\"combobox_id\" name=\"combobox_name\" data-list=\"\" class=\"combo-input\" placeholder=\""+INITIAL_PLACEHOLDER+"\"\/>";
+html += "        <input id=\"combobox_id\" name=\"form_field_name\" data-list=\"\" class=\"combo-input\" placeholder=\""+INITIAL_PLACEHOLDER+"\"\/>";
 html += "    <\/div>";
 html += "<\/div>";
 
@@ -33,6 +33,7 @@ function buildComboBoxHtml(config, template) {
   return template
       .replace(/combobox_id/g, config.id)
       .replace(/combobox_name/g, config.name)
+      .replace(/form_field_name/g, config.formFieldName)
       .replace(/combobox_label/g, config.name);
 }
 
@@ -60,14 +61,15 @@ function parseSelectors(selectors) {
   var selectorConfigMap = [];
   selectors.each(function (idx, selector) {
     var dataList = parseDataList(selector.id);
-    console.log((jQuery(selector)));
+    var jqSelector = jQuery('#'+selector.id);
     selectorConfigMap.push(
         {
           id:            selector.id,
           dataList:      dataList,
           name:          jQuery('label[for="' + selector.id + '"]').text(),
-          freeText:      jQuery(selector).hasClass('freetext'),
-          errorMessage:  jQuery(selector).next('.errorMessage')
+          formFieldName: jqSelector.attr('name'),
+          freeText:      jqSelector.hasClass('freetext'),
+          errorMessage:  jqSelector.next('.errorMessage')
         }
     );
   });
